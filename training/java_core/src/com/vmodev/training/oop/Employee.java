@@ -2,6 +2,7 @@ package com.vmodev.training.oop;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 class Employee implements Cloneable, Serializable {
 
@@ -9,7 +10,10 @@ class Employee implements Cloneable, Serializable {
 
     private String name;
 
-    public Employee() { System.out.println("Employee Constructor Called..."); }
+    public Employee() throws InterruptedException {
+        System.out.println("Employee Constructor Called...");
+        TimeUnit.SECONDS.sleep(1L);
+    }
 
     public String getName() { return name; }
 
