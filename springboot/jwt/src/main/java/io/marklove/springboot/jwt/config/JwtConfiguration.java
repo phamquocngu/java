@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "jwt")
 @Data
 public class JwtConfiguration {
-    private String secretKey;
+    private String secret;
     private String expiration;
 }

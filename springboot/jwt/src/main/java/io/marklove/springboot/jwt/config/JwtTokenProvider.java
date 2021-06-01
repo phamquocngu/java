@@ -3,18 +3,33 @@ package io.marklove.springboot.jwt.config;
 import io.jsonwebtoken.*;
 import io.marklove.springboot.jwt.model.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 
 @Component
 @Slf4j
 public class JwtTokenProvider {
-    @Value("jwt.secret")
-    private String JWT_SECRET;
-    @Value("jwt.expiration")
-    private long JWT_EXPIRATION;
+    private String JWT_SECRET = "Glorfindel";
+    private long JWT_EXPIRATION = 604800000L;
+
+    @Autowired
+    private JwtConfiguration jwtConfiguration;
+
+    //Init configuration for jwt
+    @PostConstruct
+    private void init() {
+        try {
+            if(jwtConfiguration != null) {
+                JWT_SECRET = jwtConfiguration.getSecret();
+                JWT_EXPIRATION = Long.parseLong(jwtConfiguration.getExpiration());
+            }
+        } catch (Exception e) {
+            log.error("init JwtConfiguration error: " + e.getMessage());
+        }
+    }
 
     public String generateToken(CustomUserDetails userDetails) {
         Date now = new Date();

@@ -3,7 +3,7 @@ server:
 
 jwt:
   secret: Glorfindel
-  expiration: 604800000L
+  expiration: 604800000
 
 spring:
   datasource:
