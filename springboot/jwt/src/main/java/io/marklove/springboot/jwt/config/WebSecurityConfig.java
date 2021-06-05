@@ -9,8 +9,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
@@ -20,20 +22,30 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     UserService userService;
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+    JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
+    }
+
+    @Bean
+    CORSFilter corsFilter() {
+        return new CORSFilter();
+    }
+
+    @Bean
+    CusAuthenticationEntryPoint cusAuthenticationEntryPoint() {
+        return new CusAuthenticationEntryPoint();
     }
 
     @Bean(BeanIds .AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager  authenticationManagerBean() throws Exception {
-        // Get AuthenticationManager bean
+        //Get AuthenticationManager bean
         return super.authenticationManagerBean();
     }
 
     @Bean
     public PasswordEncoder  passwordEncoder() {
-        // Password encoder, để Spring Security sử dụng mã hóa mật khẩu người dùng
+        //Password encoder: Spring Security use to encrypt password
         return new BCryptPasswordEncoder() ;
     }
 
@@ -45,13 +57,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/api/login").permitAll()
-                .anyRequest().authenticated();
-
-        // Thêm một lớp Filter kiểm tra jwt
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                    .csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers("/api/login").permitAll()
+                    .anyRequest().authenticated()
+                //Add exception authentication handler
+                .and()
+                    .exceptionHandling().authenticationEntryPoint(cusAuthenticationEntryPoint())
+                //Add filter
+                .and()
+                    .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                    .addFilterBefore(corsFilter(), ChannelProcessingFilter.class);
     }
 }

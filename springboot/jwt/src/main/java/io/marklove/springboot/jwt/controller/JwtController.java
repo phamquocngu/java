@@ -38,7 +38,7 @@ public class JwtController {
 
     //Api require authenticate
     @GetMapping("/random")
-    public String randomStuff(){
+    public String random(){
         return "Authentication success!!!";
     }
 }
